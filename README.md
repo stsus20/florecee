@@ -1,6 +1,6 @@
 # Florece
 
-Aplicación móvil Flutter de cuidado de plantas, completamente local. Interfaz Material 3 en español inspirada en los cuatro mockups: crema, verdes botánicos, tarjetas redondeadas y acentos por cuidado. Las ilustraciones se dibujan con Canvas; no hay imágenes remotas ni capturas utilizadas como pantallas.
+Aplicación móvil Flutter de cuidado de plantas, completamente local.
 
 ## Funciones
 - Inicio con plantas, estado de revisiones, próximos cuidados y estadísticas.
