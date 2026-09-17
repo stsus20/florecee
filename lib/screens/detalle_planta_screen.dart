@@ -7,6 +7,8 @@ import '../widgets/planta_card.dart';
 import '../widgets/cuidado_card.dart';
 import 'agregar_planta_screen.dart';
 import 'catalogo_screen.dart';
+import 'registro_screen.dart';
+import '../widgets/registro_card.dart';
 
 class DetallePlantaScreen extends StatefulWidget {
   final AppStore store;
@@ -119,7 +121,7 @@ class _DetallePlantaScreenState extends State<DetallePlantaScreen> {
       builder: (c) => AlertDialog(
         title: Text('¿Eliminar ${p.nombre}?'),
         content: const Text(
-          'También se eliminarán su historial, diagnósticos, fotografía y recordatorios. Esta acción no se puede deshacer.',
+          'También se eliminarán su historial, registros, PDFs internos, diagnósticos, fotografías y recordatorios. Los PDFs que ya descargaste se conservarán. Esta acción no se puede deshacer.',
         ),
         actions: [
           TextButton(
@@ -212,6 +214,42 @@ class _DetallePlantaScreenState extends State<DetallePlantaScreen> {
               ),
             ),
             Text(s.texto('descripcion')),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: salvia.withValues(alpha: .65),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tipo de cuidado: ${p.tipoCuidado == 'mito' ? 'Mito' : 'Normal'}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: verde,
+                    ),
+                  ),
+                  if (p.tipoCuidado == 'mito') ...[
+                    const SizedBox(height: 6),
+                    Text(p.mito),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      RegistroScreen(store: widget.store, planta: p),
+                ),
+              ),
+              icon: const Icon(Icons.add_chart_rounded),
+              label: const Text('Registro'),
+            ),
             const SizedBox(height: 18),
             if (next != null)
               CuidadoCard(
@@ -227,10 +265,11 @@ class _DetallePlantaScreenState extends State<DetallePlantaScreen> {
                   .map(
                     (t) => FilledButton.icon(
                       style: FilledButton.styleFrom(
-                        backgroundColor: colorCuidado(t),
+                        backgroundColor: colorCuidado(t).withValues(alpha: .13),
+                        foregroundColor: const Color(0xFF244832),
                       ),
                       onPressed: busy ? null : () => care(p, t),
-                      icon: Icon(iconCuidado(t)),
+                      icon: Icon(iconCuidado(t), color: colorCuidado(t)),
                       label: Text(t.label),
                     ),
                   )
@@ -258,6 +297,30 @@ class _DetallePlantaScreenState extends State<DetallePlantaScreen> {
             Text(
               'Historial',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Registros de crecimiento',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (!widget.store.registros.any((r) => r.plantaId == p.id))
+              const Vacio(
+                titulo: 'Su historia está por escribirse',
+                texto: 'Pulsa Registro para guardar las medidas, la foto y su informe PDF.',
+              ),
+            ...widget.store.registros
+                .where((r) => r.plantaId == p.id)
+                .map(
+                  (r) => RegistroCard(
+                    key: ValueKey(r.id),
+                    registro: r,
+                    store: widget.store,
+                  ),
+                ),
+            const SizedBox(height: 18),
+            Text(
+              'Cuidados realizados',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             if (history.isEmpty)
               const Vacio(

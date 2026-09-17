@@ -17,10 +17,17 @@ class FloreceApp extends StatelessWidget {
     theme: ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: crema,
-      colorScheme: ColorScheme.fromSeed(seedColor: verde, surface: crema),
+      colorScheme: ColorScheme.fromSeed(seedColor: verde, surface: crema)
+          .copyWith(
+            primary: verde,
+            onPrimary: Colors.white,
+            primaryContainer: const Color(0xFFD6EDB9),
+            secondary: const Color(0xFFAC573B),
+            secondaryContainer: const Color(0xFFFFE1C4),
+          ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFFFFFDFA),
-        indicatorColor: const Color(0xFFE3ECDB),
+        indicatorColor: const Color(0xFFD6EDB9),
         elevation: 0,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
@@ -52,8 +59,20 @@ class FloreceApp extends StatelessWidget {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: const Color(0xFFFFFEFA),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
+        ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFD7E1CB)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: verde, width: 1.6),
+        ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(

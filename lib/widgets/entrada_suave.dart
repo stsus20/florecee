@@ -21,9 +21,12 @@ class EntradaSuave extends StatelessWidget {
       child: child,
       builder: (context, value, child) => Opacity(
         opacity: value,
-        child: Transform.translate(
-          offset: Offset(0, 12 * (1 - value)),
-          child: child,
+        child: Transform.scale(
+          scale: .98 + .02 * value,
+          child: Transform.translate(
+            offset: Offset(0, 12 * (1 - value)),
+            child: child,
+          ),
         ),
       ),
     );
@@ -34,7 +37,7 @@ class FloreceSplash extends StatelessWidget {
   const FloreceSplash({super.key});
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: const Color(0xFFFAF7F0),
+    backgroundColor: const Color(0xFFFFF9E9),
     body: Center(
       child: EntradaSuave(
         duration: const Duration(milliseconds: 650),
@@ -64,7 +67,7 @@ class FloreceSplash extends StatelessWidget {
                 fontFamily: 'serif',
                 fontSize: 44,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF365F45),
+                color: Color(0xFF247344),
               ),
             ),
             const SizedBox(height: 8),
@@ -77,8 +80,8 @@ class FloreceSplash extends StatelessWidget {
               width: 70,
               child: LinearProgressIndicator(
                 minHeight: 2,
-                color: Color(0xFF6F915B),
-                backgroundColor: Color(0xFFE8EEDF),
+                color: Color(0xFF63A53E),
+                backgroundColor: Color(0xFFE1F0CD),
               ),
             ),
           ],

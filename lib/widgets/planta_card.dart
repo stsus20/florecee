@@ -4,10 +4,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/planta.dart';
+import 'pressable_scale.dart';
 
-const verde = Color(0xFF365F45),
-    crema = Color(0xFFFAF7F0),
-    salvia = Color(0xFFE8EEDF);
+const verde = Color(0xFF247344),
+    crema = Color(0xFFFFF9E9),
+    salvia = Color(0xFFE1F0CD);
 
 class PlantaImagen extends StatelessWidget {
   final String especie;
@@ -39,7 +40,7 @@ class PlantaImagen extends StatelessWidget {
       gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFFF2E7D8), salvia],
+        colors: [Color(0xFFFFE9BC), salvia],
       ),
     ),
     child: CustomPaint(painter: BotanicaPainter(especie)),
@@ -78,6 +79,81 @@ class BotanicaPainter extends CustomPainter {
           paint,
         );
       }
+    } else if (especie == 'malvon') {
+      for (final center in [
+        const Offset(-32, -111),
+        const Offset(26, -139),
+        const Offset(43, -85),
+      ]) {
+        paint
+          ..color = verde
+          ..strokeWidth = 3
+          ..style = PaintingStyle.stroke;
+        canvas.drawLine(const Offset(0, -28), center, paint);
+        paint.style = PaintingStyle.fill;
+        for (var i = 0; i < 7; i++) {
+          final angle = i * math.pi / 3;
+          final flower =
+              center +
+              (i == 6
+                  ? Offset.zero
+                  : Offset(math.cos(angle) * 13, math.sin(angle) * 12));
+          paint.color = i.isEven
+              ? const Color(0xFFEE6481)
+              : const Color(0xFFD93860);
+          for (var j = 0; j < 5; j++) {
+            final a = j * math.pi * 2 / 5;
+            canvas.drawCircle(
+              flower + Offset(math.cos(a) * 5, math.sin(a) * 5),
+              5,
+              paint,
+            );
+          }
+          paint.color = const Color(0xFFFFD082);
+          canvas.drawCircle(flower, 2, paint);
+        }
+      }
+      for (final center in [
+        const Offset(-29, -57),
+        const Offset(26, -59),
+        const Offset(-4, -81),
+      ]) {
+        final leaf = Path();
+        for (var i = 0; i <= 64; i++) {
+          final a = i * math.pi * 2 / 64;
+          final radius = 20 + 2 * math.cos(a * 8);
+          final point =
+              center + Offset(math.cos(a) * radius, math.sin(a) * radius * .8);
+          if (i == 0) {
+            leaf.moveTo(point.dx, point.dy);
+          } else {
+            leaf.lineTo(point.dx, point.dy);
+          }
+        }
+        paint
+          ..color = const Color(0xFF61A64B)
+          ..style = PaintingStyle.fill;
+        canvas.drawPath(leaf..close(), paint);
+        paint
+          ..color = const Color(0xFF33763C)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3;
+        canvas.drawOval(
+          Rect.fromCenter(center: center, width: 27, height: 22),
+          paint,
+        );
+        paint
+          ..color = const Color(0xFFB4D877)
+          ..strokeWidth = 1;
+        for (var i = 0; i < 5; i++) {
+          final a = i * math.pi * 2 / 5;
+          canvas.drawLine(
+            center,
+            center + Offset(math.cos(a) * 18, math.sin(a) * 15),
+            paint,
+          );
+        }
+      }
     } else {
       for (var i = 0; i < 7; i++) {
         final x = (i - 3) * 16.0, y = -65.0 - (i % 3) * 29;
@@ -91,7 +167,7 @@ class BotanicaPainter extends CustomPainter {
         canvas.rotate((i - 3) * .24);
         paint
           ..style = PaintingStyle.fill
-          ..color = i.isEven ? const Color(0xFF6F915B) : verde;
+          ..color = i.isEven ? const Color(0xFF71B445) : verde;
         final leaf = Path()
           ..moveTo(0, 12)
           ..quadraticBezierTo(-35, -12, -8, -49)
@@ -105,13 +181,16 @@ class BotanicaPainter extends CustomPainter {
               'tulipan',
               'rosa',
               'geranio',
+              'malvon',
               'orquidea',
               'girasol',
             ].contains(especie) &&
             i % 2 == 0) {
           paint.color = especie == 'girasol'
               ? const Color(0xFFE4B349)
-              : const Color(0xFFD99291);
+              : especie == 'malvon'
+              ? const Color(0xFFE55868)
+              : const Color(0xFFE9909A);
           for (var j = 0; j < 5; j++) {
             final a = j * math.pi * 2 / 5;
             canvas.drawOval(
@@ -168,45 +247,49 @@ class PlantaCard extends StatelessWidget {
     required this.onTap,
   });
   @override
-  Widget build(BuildContext context) => Card(
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          PlantaImagen(especie: planta.especie, foto: planta.foto),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  planta.nombre,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Text(
-                  cientifico,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontStyle: FontStyle.italic,
+  Widget build(BuildContext context) => PressableScale(
+    child: Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            PlantaImagen(especie: planta.especie, foto: planta.foto),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    planta.nombre,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                ),
-                const SizedBox(height: 10),
-                Chip(
-                  avatar: Icon(
-                    pendiente ? Icons.priority_high : Icons.eco,
-                    size: 17,
+                  Text(
+                    cientifico,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
-                  label: Text(pendiente ? 'Por revisar' : 'Al día'),
-                  backgroundColor: pendiente ? const Color(0xFFF7DFD7) : salvia,
-                ),
-                const SizedBox(height: 8),
-                Text(accion),
-              ],
+                  const SizedBox(height: 10),
+                  Chip(
+                    avatar: Icon(
+                      pendiente ? Icons.priority_high : Icons.eco,
+                      size: 17,
+                    ),
+                    label: Text(pendiente ? 'Por revisar' : 'Al día'),
+                    backgroundColor: pendiente
+                        ? const Color(0xFFF7DFD7)
+                        : salvia,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(accion),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );

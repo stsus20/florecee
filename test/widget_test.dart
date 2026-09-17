@@ -37,9 +37,9 @@ void main() {
     return store;
   }
 
-  test('Catalog has all 15 complete species', () {
+  test('Catalog has all 16 complete species', () {
     final s = fixture();
-    expect(s.catalogo.length, 15);
+    expect(s.catalogo.length, 16);
     for (final e in s.catalogo) {
       for (final key in [
         'id',
@@ -61,6 +61,23 @@ void main() {
         expect(e.data[key], isNotNull);
       }
     }
+  });
+  testWidgets('Malvones can be found without accents', (tester) async {
+    final store = fixture();
+    final malvon = store.catalogo.singleWhere((s) => s.id == 'malvon');
+    expect(malvon.cientifico, 'Pelargonium × hortorum');
+    expect(malvon.texto('fuentes'), isNotEmpty);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: CatalogoScreen(store: store)),
+      ),
+    );
+    await tester.enterText(find.byType(TextField), 'malvones');
+    await tester.pumpAndSettle();
+    expect(find.text('Malvón'), findsOneWidget);
+    await tester.tap(find.text('Malvón'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pelargonium × hortorum'), findsOneWidget);
   });
   testWidgets('Main screens fit 320px with larger text', (tester) async {
     tester.view.physicalSize = const Size(320, 700);

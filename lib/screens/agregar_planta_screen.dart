@@ -22,7 +22,8 @@ class AgregarPlantaScreen extends StatefulWidget {
 
 class _AgregarPlantaScreenState extends State<AgregarPlantaScreen> {
   final form = GlobalKey<FormState>();
-  late TextEditingController nombre, tamano, intervalo, notas;
+  late TextEditingController nombre, tamano, intervalo, notas, mito;
+  String? tipoCuidado;
   late String especie, ubicacion, luz, recipiente;
   String? foto;
   late bool drenaje;
@@ -41,6 +42,8 @@ class _AgregarPlantaScreenState extends State<AgregarPlantaScreen> {
       text: '${p?.intervalo ?? widget.store.especie(especie).intervalo}',
     );
     notas = TextEditingController(text: p?.notas ?? '');
+    mito = TextEditingController(text: p?.mito ?? '');
+    tipoCuidado = p?.tipoCuidado;
     ubicacion = p?.ubicacion ?? 'Interior';
     luz = p?.luz ?? 'Luz indirecta';
     recipiente = p?.recipiente ?? 'Maceta';
@@ -74,6 +77,7 @@ class _AgregarPlantaScreenState extends State<AgregarPlantaScreen> {
     tamano.dispose();
     intervalo.dispose();
     notas.dispose();
+    mito.dispose();
     super.dispose();
   }
 
@@ -125,6 +129,8 @@ class _AgregarPlantaScreenState extends State<AgregarPlantaScreen> {
           ultimoRiego: ultimo,
           intervalo: int.parse(intervalo.text),
           notas: notas.text.trim(),
+          tipoCuidado: tipoCuidado!,
+          mito: tipoCuidado == 'mito' ? mito.text.trim() : '',
         ),
       );
       await widget.store.deletePhoto(widget.planta?.foto);
@@ -224,6 +230,57 @@ class _AgregarPlantaScreenState extends State<AgregarPlantaScreen> {
                     }),
             ),
             const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: salvia,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Tu forma de cuidar',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: tipoCuidado,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Tipo de cuidado',
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'normal', child: Text('Normal')),
+                      DropdownMenuItem(value: 'mito', child: Text('Mito')),
+                    ],
+                    validator: (v) =>
+                        v == null ? 'Selecciona un tipo de cuidado' : null,
+                    onChanged: saving
+                        ? null
+                        : (v) => setState(() => tipoCuidado = v),
+                  ),
+                  if (tipoCuidado == 'mito') ...[
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      controller: mito,
+                      maxLength: 300,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: '¿Qué tipo de mito es?',
+                        hintText:
+                            'Describe con tus palabras el cuidado que realizas',
+                      ),
+                      validator: (v) =>
+                          tipoCuidado == 'mito' && (v?.trim().isEmpty ?? true)
+                          ? 'Describe el mito'
+                          : null,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
             drop('Ubicación', ubicacion, [
               'Interior',
               'Exterior',

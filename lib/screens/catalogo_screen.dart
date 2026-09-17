@@ -19,9 +19,9 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
   Widget build(BuildContext context) {
     final list = widget.store.catalogo
         .where(
-          (s) => ('${s.nombre} ${s.cientifico}').toLowerCase().contains(
-            query.toLowerCase(),
-          ),
+          (s) => normalizar(
+            '${s.nombre} ${s.cientifico} ${s.texto('otrosNombres')}',
+          ).contains(normalizar(query)),
         )
         .toList();
     return ListView(
@@ -33,7 +33,9 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const SizedBox(height: 8),
-        const Text('15 especies · siempre disponibles sin conexión'),
+        Text(
+          '${widget.store.catalogo.length} especies · siempre disponibles sin conexión',
+        ),
         const SizedBox(height: 20),
         TextField(
           onChanged: (s) => setState(() => query = s),
@@ -131,6 +133,11 @@ class GuiaEspecie extends StatelessWidget {
         'drenaje': 'Drenaje',
         'consejos': 'Consejos',
         'problemas': 'Problemas frecuentes',
+        if (especie.texto('familia').isNotEmpty) 'familia': 'Familia botánica',
+        if (especie.texto('otrosNombres').isNotEmpty)
+          'otrosNombres': 'También se conoce como',
+        if (especie.texto('fuentes').isNotEmpty)
+          'fuentes': 'Fuentes consultadas',
       }.entries.map(
         (e) => Card(
           child: ListTile(
@@ -147,4 +154,19 @@ class GuiaEspecie extends StatelessWidget {
       ),
     ],
   );
+}
+
+String normalizar(String texto) {
+  var result = texto.toLowerCase();
+  for (final entry in {
+    'á': 'a',
+    'é': 'e',
+    'í': 'i',
+    'ó': 'o',
+    'ú': 'u',
+    'ü': 'u',
+  }.entries) {
+    result = result.replaceAll(entry.key, entry.value);
+  }
+  return result;
 }

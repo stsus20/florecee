@@ -64,7 +64,7 @@ class Vacio extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
     child: Column(
       children: [
-        const Icon(Icons.spa_outlined, size: 58, color: Color(0xFF6F915B)),
+        const Icon(Icons.spa_outlined, size: 58, color: Color(0xFF63A53E)),
         const SizedBox(height: 16),
         Text(
           titulo,

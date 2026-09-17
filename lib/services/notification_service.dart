@@ -179,7 +179,7 @@ class NotificationService {
           'Cuidados de plantas',
           channelDescription: 'Revisiones suaves para acompañar a tus plantas',
           icon: 'ic_notification',
-          color: const Color(0xFF365F45),
+          color: const Color(0xFF247344),
           largeIcon: const DrawableResourceAndroidBitmap('notification_brand'),
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,

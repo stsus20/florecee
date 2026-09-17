@@ -42,6 +42,8 @@ dependencies:
   timezone: ^0.11.1
   intl: ^0.20.3
   flutter_timezone: ^5.1.0
+  pdf: ^3.13.0
+  file_picker: ^13.1.0
 
 dev_dependencies:
   flutter_test:
@@ -101,6 +103,7 @@ flutter:
   assets:
     - lib/assets/data/catalogo_plantas.json
     - lib/assets/icon/app_icon.png
+    - lib/assets/fonts/
 
 flutter_launcher_icons:
   android: true

@@ -253,5 +253,30 @@
     "descripcion": "Albahaca: pequeños cuidados adaptados a su especie y a tu espacio.",
     "suelo": "Sí, si el clima y el drenaje son adecuados.",
     "drenaje": "Necesario: evita agua estancada."
+  },
+  {
+    "id": "malvon",
+    "nombre": "Malvón",
+    "cientifico": "Pelargonium × hortorum",
+    "intervalo": 4,
+    "descripcion": "Malvón de jardín o geranio zonal: hojas redondeadas y ramilletes de flores rojas, rosas o blancas. Pertenece a Geraniaceae; el nombre popular puede variar según la región.",
+    "luz": "Sol y buena iluminación; admite semisombra. En interior, una ventana luminosa protegida del sol abrasador.",
+    "riego": "Riego moderado. Comprueba el sustrato y evita mantenerlo mojado; en invierno deja secar entre riegos.",
+    "floracion": "Principalmente durante la temporada cálida; la duración depende del clima y del cultivar.",
+    "fertilizacion": "Abono equilibrado en crecimiento y rico en potasio al florecer, siguiendo la etiqueta. Reduce el abono en reposo.",
+    "sustrato": "Mezcla fértil, aireada y con buen drenaje.",
+    "maceta": "Con orificios y proporcionada al cepellón. Trasplanta a una talla mayor cuando las raíces ocupen el espacio.",
+    "suelo": "Sí, en terreno drenante y protegido de heladas.",
+    "drenaje": "Imprescindible; vacía el agua retenida en el plato.",
+    "consejos": "Retira flores marchitas y protege de heladas. Se multiplica por esquejes en crecimiento activo.",
+    "problemas": "Pulgones, trips, mosca blanca, roya y moho gris. El suelo encharcado favorece pudriciones.",
+    "familia": "Geraniaceae",
+    "otrosNombres": "Malvones, malvón de jardín, geranio zonal, cardenal.",
+    "fuentes": "Royal Horticultural Society: How to grow pelargoniums; Pelargonium zonale. Municipalidad de General Pueyrredon: Ordenanza 22425, p. 55. Consultado el 13/09/2026.",
+    "referencias": [
+      "https://www.rhs.org.uk/plants/pelargonium/growing-guide",
+      "https://www.rhs.org.uk/plants/12407/pelargonium-zonale/details",
+      "https://www.concejomdp.gov.ar/biblioteca/docs/o22425.pdf"
+    ]
   }
 ]

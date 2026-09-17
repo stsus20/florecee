@@ -1,4 +1,5 @@
 import '../widgets/notification_card.dart';
+import '../widgets/racha_card.dart';
 
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,7 @@ import '../widgets/planta_card.dart';
 import '../widgets/cuidado_card.dart';
 import 'agregar_planta_screen.dart';
 import 'detalle_planta_screen.dart';
+import 'informe_screen.dart';
 
 class InicioScreen extends StatelessWidget {
   final AppStore store;
@@ -15,15 +17,21 @@ class InicioScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final today = store.cuidados
-        .where((c) => mismoDia(c.fecha, now))
-        .map((c) => c.plantaId)
-        .toSet()
-        .length;
+    final today = {
+      ...store.cuidados
+          .where((c) => mismoDia(c.fecha, now))
+          .map((c) => c.plantaId),
+      ...store.registros
+          .where((r) => mismoDia(r.fecha, now))
+          .map((r) => r.plantaId),
+    }.length;
     final week = dia(now).subtract(Duration(days: now.weekday - 1));
     final counts = <int, int>{};
     for (final c in store.cuidados) {
       counts.update(c.plantaId, (v) => v + 1, ifAbsent: () => 1);
+    }
+    for (final r in store.registros) {
+      counts.update(r.plantaId, (v) => v + 1, ifAbsent: () => 1);
     }
     final most = counts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -66,10 +74,28 @@ class InicioScreen extends StatelessWidget {
           style: TextStyle(fontSize: 16, color: Colors.black54),
         ),
         const SizedBox(height: 24),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (_) => InformeScreen(store: store),
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(54),
+            side: const BorderSide(color: Color(0xFFB7D59A)),
+          ),
+          icon: const Icon(Icons.file_download_outlined),
+          label: const Text('Descargar informe'),
+        ),
+        const SizedBox(height: 18),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: salvia,
+            gradient: const LinearGradient(
+              colors: [Color(0xFFE0F0C1), Color(0xFFF8EDBC)],
+            ),
             borderRadius: BorderRadius.circular(24),
           ),
           child: Column(
@@ -97,6 +123,8 @@ class InicioScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
+        RachaCard(dias: store.racha),
+        const SizedBox(height: 24),
         Row(
           children: [
             Expanded(
@@ -210,7 +238,6 @@ class InicioScreen extends StatelessWidget {
               '${store.cuidados.where((c) => !c.fecha.isBefore(week)).length}',
               'Cuidados esta semana',
             ),
-            stat('${store.racha}', 'Días de racha'),
           ],
         ),
         if (most.isNotEmpty)

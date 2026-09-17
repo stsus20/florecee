@@ -5,13 +5,14 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/planta.dart';
 import '../models/cuidado.dart';
+import '../models/registro.dart';
 
 class DatabaseService {
   late Database db;
   Future<void> open() async {
     db = await openDatabase(
       p.join(await getDatabasesPath(), 'florece.db'),
-      version: 1,
+      version: 2,
       onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
       onCreate: (db, v) async {
         await db.execute(
@@ -29,14 +30,46 @@ class DatabaseService {
         await db.execute(
           'CREATE INDEX cuidados_planta_fecha ON cuidados(plantaId,fecha)',
         );
+        await _upgradeV2(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        // Add ordered migrations here when increasing the schema version.
-        if (oldVersion < 1) {
-          throw StateError('Versión no compatible');
+        if (oldVersion < 2) {
+          await _upgradeV2(db);
         }
       },
     );
+  }
+
+  Future<void> _upgradeV2(DatabaseExecutor db) async {
+    await db.execute(
+      "ALTER TABLE plantas ADD COLUMN tipoCuidado TEXT NOT NULL DEFAULT 'normal' CHECK(tipoCuidado IN ('normal','mito'))",
+    );
+    await db.execute(
+      "ALTER TABLE plantas ADD COLUMN mito TEXT NOT NULL DEFAULT ''",
+    );
+    await db.execute(
+      'CREATE TABLE registros(id INTEGER PRIMARY KEY AUTOINCREMENT,plantaId INTEGER NOT NULL REFERENCES plantas(id) ON DELETE CASCADE,fecha TEXT NOT NULL,nombre TEXT NOT NULL,especie TEXT NOT NULL,tipoCuidado TEXT NOT NULL,mito TEXT NOT NULL,hojas INTEGER NOT NULL CHECK(hojas>=0),amarillas INTEGER NOT NULL CHECK(amarillas IN (0,1)),porcentaje INTEGER NOT NULL CHECK(porcentaje BETWEEN 0 AND 100),altura REAL NOT NULL CHECK(altura>0),anchura REAL NOT NULL CHECK(anchura>0),foto TEXT NOT NULL,pdf TEXT NOT NULL)',
+    );
+    await db.execute(
+      'CREATE INDEX registros_planta_fecha ON registros(plantaId,fecha DESC,id DESC)',
+    );
+  }
+
+  Future<List<Registro>> registros() async => (await db.query(
+    'registros',
+    orderBy: 'fecha DESC,id DESC',
+  )).map(Registro.fromMap).toList();
+  Future<int> saveRegistro(Registro r) async {
+    r.validate();
+    return db.insert('registros', r.toMap()..remove('id'));
+  }
+
+  Future<bool> photoInUse(String photo) async {
+    final rows = await db.rawQuery(
+      'SELECT foto FROM plantas WHERE foto=? UNION ALL SELECT foto FROM registros WHERE foto=? LIMIT 1',
+      [photo, photo],
+    );
+    return rows.isNotEmpty;
   }
 
   Future<List<Planta>> plantas() async => (await db.query(
@@ -75,6 +108,10 @@ class DatabaseService {
   }
 
   Future<int> save(Planta planta) => db.transaction((tx) async {
+    if (!['normal', 'mito'].contains(planta.tipoCuidado) ||
+        (planta.tipoCuidado == 'mito' && planta.mito.trim().isEmpty)) {
+      throw ArgumentError('Indica el tipo de cuidado y el mito');
+    }
     final m = planta.toMap()..remove('id');
     final previous = planta.id == null
         ? null

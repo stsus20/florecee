@@ -2,6 +2,7 @@ class Planta {
   final int? id;
   final String nombre, especie, ubicacion, luz, recipiente, tamano, notas;
   final String? foto;
+  final String tipoCuidado, mito;
   final bool drenaje;
   final int intervalo;
   final DateTime ultimoRiego;
@@ -18,6 +19,8 @@ class Planta {
     required this.ultimoRiego,
     required this.intervalo,
     this.notas = '',
+    this.tipoCuidado = 'normal',
+    this.mito = '',
   });
   Map<String, Object?> toMap() => {
     'id': id,
@@ -32,6 +35,8 @@ class Planta {
     'ultimoRiego': ultimoRiego.toIso8601String(),
     'intervalo': intervalo,
     'notas': notas,
+    'tipoCuidado': tipoCuidado,
+    'mito': tipoCuidado == 'mito' ? mito.trim() : '',
   };
   factory Planta.fromMap(Map<String, Object?> m) => Planta(
     id: m['id'] as int,
@@ -46,5 +51,7 @@ class Planta {
     ultimoRiego: DateTime.parse(m['ultimoRiego'] as String),
     intervalo: m['intervalo'] as int,
     notas: m['notas'] as String,
+    tipoCuidado: m['tipoCuidado'] as String? ?? 'normal',
+    mito: m['mito'] as String? ?? '',
   );
 }

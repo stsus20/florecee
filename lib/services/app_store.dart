@@ -10,20 +10,29 @@ import 'package:image_picker/image_picker.dart';
 import '../models/planta.dart';
 import '../models/especie.dart';
 import '../models/cuidado.dart';
+import '../models/racha.dart';
+import '../models/registro.dart';
+import 'report_service.dart';
 import 'database_service.dart';
 import 'notification_service.dart';
 
 class AppStore extends ChangeNotifier {
   final DatabaseService database;
   final NotificationService notifications;
-  AppStore({DatabaseService? database, NotificationService? notifications})
-    : database = database ?? DatabaseService(),
-      notifications = notifications ?? NotificationService();
+  final ReportService reports;
+  AppStore({
+    DatabaseService? database,
+    NotificationService? notifications,
+    ReportService? reports,
+  }) : database = database ?? DatabaseService(),
+       notifications = notifications ?? NotificationService(),
+       reports = reports ?? ReportService();
   List<Planta> plantas = [];
   List<Especie> catalogo = [];
   List<Cuidado> cuidados = [];
   List<Recordatorio> recordatorios = [];
   List<Map<String, Object?>> diagnosticos = [];
+  List<Registro> registros = [];
   String? aviso;
   Future<void>? _refresh;
   Future<void> initialize() async {
@@ -58,6 +67,7 @@ class AppStore extends ChangeNotifier {
     cuidados = await database.cuidados();
     recordatorios = await database.recordatorios();
     diagnosticos = await database.diagnosticos();
+    registros = await database.registros();
     try {
       await notifications.sync(recordatorios, plantas);
       aviso = null;
@@ -83,9 +93,54 @@ class AppStore extends ChangeNotifier {
   }
 
   Future<void> remove(Planta p) async {
+    final reportsToRemove = registros.where((r) => r.plantaId == p.id).toList();
     await database.remove(p.id!);
     await reload();
     await deletePhoto(p.foto);
+    for (final r in reportsToRemove) {
+      await deletePhoto(r.foto);
+      await reports.remove(r.pdf);
+    }
+  }
+
+  Future<void> addRegistro({
+    required Planta planta,
+    required int hojas,
+    required bool amarillas,
+    required int porcentaje,
+    required double altura,
+    required double anchura,
+    required String foto,
+  }) async {
+    final output = await reports.newPath();
+    if (!await File(foto).exists()) {
+      throw StateError('La fotografía ya no está disponible');
+    }
+    final s = especie(planta.especie);
+    final r = Registro(
+      plantaId: planta.id!,
+      fecha: DateTime.now(),
+      nombre: planta.nombre,
+      especie: '${s.nombre} · ${s.cientifico}',
+      tipoCuidado: planta.tipoCuidado,
+      mito: planta.mito,
+      hojas: hojas,
+      amarillas: amarillas,
+      porcentaje: porcentaje,
+      altura: altura,
+      anchura: anchura,
+      foto: foto,
+      pdf: output,
+    );
+    r.validate();
+    try {
+      await reports.persist(r);
+      await database.saveRegistro(r);
+    } catch (_) {
+      await reports.remove(output);
+      rethrow;
+    }
+    await reload();
   }
 
   Future<void> care(
@@ -112,7 +167,7 @@ class AppStore extends ChangeNotifier {
   }
 
   Future<void> deletePhoto(String? file) async {
-    if (file == null || plantas.any((p) => p.foto == file)) {
+    if (file == null || await database.photoInUse(file)) {
       return;
     }
     final root = path.join(
@@ -125,16 +180,9 @@ class AppStore extends ChangeNotifier {
   }
 
   int get racha {
-    final days = cuidados.map((c) => dia(c.fecha)).toSet();
-    var date = dia(DateTime.now());
-    if (!days.contains(date)) {
-      date = DateTime(date.year, date.month, date.day - 1);
-    }
-    var count = 0;
-    while (days.contains(date)) {
-      count++;
-      date = DateTime(date.year, date.month, date.day - 1);
-    }
-    return count;
+    return calcularRacha([
+      ...cuidados.map((c) => c.fecha),
+      ...registros.map((r) => r.fecha),
+    ], DateTime.now());
   }
 }
